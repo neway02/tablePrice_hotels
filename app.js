@@ -1,5 +1,6 @@
 
 const currentYear = "2020";
+let datePickers = [];
 
 // Конфиг для даты
 const date_config = {
@@ -18,11 +19,14 @@ flatpickr.localize(flatpickr.l10ns.ru);
 $(document).ready(function(){
 
 
-	$("input[type=date]").not(".hidden input[type=date]").flatpickr(date_config);
+	// datePickers = flatpickr("input[type=date]", date_config);
 
 
 
 });
+
+
+
 
 
 /* Functions */
@@ -48,9 +52,10 @@ function addRow() {
 
 	let newRow = $(baseRow).appendTo("#price-room__period-list");
 
-	newRow.find("input[type=date]").each(function() {
-		$(this).flatpickr(date_config)
-	});
+	// newRow.find("input[type=date]").each(function() {
+	// 	$(this).flatpickr(date_config)
+	// });
+
 }
 
 function removeRow(button) {
@@ -83,8 +88,26 @@ function updateDateCount(deletedObj) {
 	});
 }
 
-function setMinDateParam(date, obj) {
+function setMinDateParam(obj) {
 
+	let objIndex = $(obj).attr("data-date-count");
+	let objValue = new Date($(obj).val());
+
+	let nextDate = objValue.setDate(objValue.getDate() + 1);
+
+	let objYear = objValue.getUTCFullYear();
+	let objMonth = objValue.getUTCMonth() + 1;
+	let objDay = objValue.getUTCDate();
+	
+	let newDate = objYear + "-" + objMonth + "-" + objDay;
+
+	$("[data-date-count]").each(function() {
+		let dataIndex = $(this).attr("data-date-count");
+
+		if(+dataIndex > +objIndex) {
+			$(this).attr("min", newDate);
+		}
+	});
 }
 
 /* Events */
@@ -94,4 +117,8 @@ $(document).on("click", ".js-add-period", function () {
 
 $(document).on("click", ".js-delete-period", function () {
   removeRow($(this));
+});
+
+$(document).on("change", "[data-date-count]", function () {
+  setMinDateParam($(this));
 });

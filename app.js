@@ -184,7 +184,7 @@ $(document).on("change", "[data-date-count]", function() {
 
 $(document).on("submit", "#prices_periods", function(e) {
 	e.preventDefault();
-	let data = [];
+	let dataPeriod = [];
 	$("#prices_periods").find(".price-room__period-item").each(function() {
 		let dateObj = {};
 
@@ -194,8 +194,22 @@ $(document).on("submit", "#prices_periods", function(e) {
 			}
 		});
 
-		data.push(dateObj);
+		dataPeriod.push(dateObj);
 	});
 
-	console.log(data);
+	console.log(dataPeriod);
+
+	$.ajax({
+		method: "POST",
+		url: "./model.php",
+		data: {
+			"periods" : dataPeriod
+		},
+		success: function( msg ) {
+			console.log(msg);
+		},
+		error: function(data, errorThrown) {
+       alert('request failed : '+ errorThrown);
+    }
+	})
 });

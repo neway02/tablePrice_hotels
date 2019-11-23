@@ -185,19 +185,28 @@ $(document).on("change", "[data-date-count]", function() {
 $(document).on("submit", "#prices_periods", function(e) {
 	e.preventDefault();
 	let dataPeriod = [];
+	let error = false;
+
+
 	$("#prices_periods").find(".price-room__period-item").each(function() {
 		let dateObj = {};
 
 		$(this).find("[data-date-count]").each(function() {
 			if($(this).val()) {
 				Object.assign(dateObj, {[$(this).attr("name")]: $(this).val()});
+			} else {
+				alert("Заполните все поля. Отсутствует поле № " + $(this).attr("data-date-count"));
+				error = true;
+				return false;
 			}
 		});
 
 		dataPeriod.push(dateObj);
 	});
 
-	console.log(dataPeriod);
+	if(error) {
+		return false;
+	}
 
 	$.ajax({
 		method: "POST",

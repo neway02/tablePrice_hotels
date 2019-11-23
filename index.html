@@ -9,7 +9,6 @@
 
     <!-- Inlude css -->
     <link rel="stylesheet" href="./reset.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="./style.css">
 
 </head>
@@ -24,11 +23,11 @@
             <div class="price-room__form">
                 <div class="price-room__group js-date-container">
                     <span class="price-room__group-text">с</span>
-                    <input type="date" data-date-count=1>
+                    <input type="date" name="dateFrom" data-date-count=1>
                 </div>
                 <div class="price-room__group js-date-container">
                     <span class="price-room__group-text">по</span>
-                    <input type="date" data-date-count=2>
+                    <input type="date" name="dateTo" data-date-count=2>
                 </div>
             </div>
             <a class="price-room__period-item-del js-delete-period" href="javascript:void(0);">
@@ -143,6 +142,4 @@
 
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://npmcdn.com/flatpickr/dist/l10n/ru.js"></script>
 <script src="./app.js"></script>

@@ -1,25 +1,19 @@
 
-const currentYear = "2020";
+const currentYear = "2020-01-01";
 let datePickers = [];
-
-// Конфиг для даты
-const date_config = {
-	enableTime: false,
-	dateFormat: "Y-m-d",
-	minDate: currentYear,
-	onClose: function(selectedDates, dateStr, instance) {
-		setMinDateParam(dateStr, instance);
-		},
-};
-
-flatpickr.localize(flatpickr.l10ns.ru);
 
 
 
 $(document).ready(function(){
 
 
-	// datePickers = flatpickr("input[type=date]", date_config);
+	//
+
+	// [
+	// 	{"dateFrom" : "x1", "dateTo" : "y1"},
+	// 	{"dateFrom" : "x2", "dateTo" : "y2"},
+	// 	{"dateFrom" : "x3", "dateTo" : "y3"}
+	// ];
 
 
 
@@ -52,10 +46,7 @@ function addRow() {
 
 	let newRow = $(baseRow).appendTo("#price-room__period-list");
 
-	// newRow.find("input[type=date]").each(function() {
-	// 	$(this).flatpickr(date_config)
-	// });
-
+	setMinDateParam($(`[data-date-count=${lastCount}]`));
 }
 
 function removeRow(button) {
@@ -88,16 +79,65 @@ function updateDateCount(deletedObj) {
 	});
 }
 
+function findDateValue(obj) {
+	let dateString = '';
+	let firstCall = $(obj).closest(".price-room__group");
+	let prevNode = '';
+
+	debugger
+
+	prevNode = firstCall.prev(".price-room__group");
+
+	if (prevNode.length > 0) {
+		let prevDate = prevNode.find("[data-date-count]");
+		if(prevDate.val()) {
+			dateString = prevDate.val();
+		} else {
+			dateString = findDateValue(prevDate);
+		}
+	} else {
+		let prevGroup = firstCall.closest(".price-room__period-item").prev(".price-room__period-item");
+		
+		if(prevGroup.length > 0) {
+			let nextCall = prevGroup.find(".price-room__group").last();
+			let nextDate = nextCall.find("[data-date-count]");
+			if(nextDate.val()) {
+				dateString = nextDate.val();
+			} else {
+				dateString = findDateValue(nextDate);
+			}
+		} else {
+			dateString = '';
+		}
+	}
+	return dateString;
+}
+
 function setMinDateParam(obj) {
 
+	// Правильный формат даты 2019-11-02
 	let objIndex = $(obj).attr("data-date-count");
-	let objValue = new Date($(obj).val());
+	let objValue = {};
+	
+	if(!$(obj).val()) {
+		objValue = new Date(findDateValue(obj));
+	} else {
+		objValue = new Date($(obj).val());
+	}
 
-	let nextDate = objValue.setDate(objValue.getDate() + 1);
+	let nextDate = new Date(objValue.getTime() + (24 * 60 * 60 * 1000));
 
-	let objYear = objValue.getUTCFullYear();
-	let objMonth = objValue.getUTCMonth() + 1;
-	let objDay = objValue.getUTCDate();
+	let objYear = nextDate.getUTCFullYear();
+	let objMonth = nextDate.getUTCMonth() + 1;
+	let objDay = nextDate.getUTCDate();
+
+	//Проверяем на корректность формата даты (dd, mm)
+	if (objDay && objDay < 10) {
+		objDay = '0' + objDay;
+	  } 
+	if (objMonth && objMonth < 10) {
+		objMonth = '0' + objMonth;
+	} 
 	
 	let newDate = objYear + "-" + objMonth + "-" + objDay;
 
@@ -106,19 +146,46 @@ function setMinDateParam(obj) {
 
 		if(+dataIndex > +objIndex) {
 			$(this).attr("min", newDate);
+
+			let eachValue = $(this).val();
+
+			if(eachValue) {
+				let eachDate = new Date(eachValue);
+				if(eachDate <= nextDate) {
+					$(this).val("");
+				}
+			}
 		}
 	});
 }
 
 /* Events */
-$(document).on("click", ".js-add-period", function () {
+$(document).on("click", ".js-add-period", function() {
 	addRow();
 });
 
-$(document).on("click", ".js-delete-period", function () {
+$(document).on("click", ".js-delete-period", function() {
   removeRow($(this));
 });
 
-$(document).on("change", "[data-date-count]", function () {
+$(document).on("change", "[data-date-count]", function() {
   setMinDateParam($(this));
+});
+
+$(document).on("submit", "#prices_periods", function(e) {
+	e.preventDefault();
+	let data = [];
+	$("#prices_periods").find(".price-room__period-item").each(function() {
+		let dateObj = {};
+
+		$(this).find("[data-date-count]").each(function() {
+			if($(this).val()) {
+				Object.assign(dateObj, {[$(this).attr("name")]: $(this).val()});
+			}
+		});
+
+		data.push(dateObj);
+	});
+
+	console.log(data);
 });

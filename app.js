@@ -203,7 +203,8 @@ $(document).on("submit", "#prices_periods", function(e) {
 		method: "POST",
 		url: "./model.php",
 		data: {
-			"periods" : dataPeriod
+			"periods" : dataPeriod,
+			"hotel_id" : "1",
 		},
 		success: function( msg ) {
 			console.log(msg);

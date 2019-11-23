@@ -51,8 +51,20 @@ function addRow() {
 
 function removeRow(button) {
 	let listItem = button.closest(".price-room__period-item");
-	updateDateCount(listItem.find("[data-date-count]").eq(0));
+	let listItemDate = listItem.find("[data-date-count]").eq(0);
+	let listItemDateIndex = listItemDate.attr("data-date-count");
+
+	updateDateCount(listItemDate);
 	listItem.remove();
+
+	let lastIndexDate = $(`[data-date-count = ${listItemDateIndex-1}]`);
+
+	if(lastIndexDate.length > 0) {
+		setMinDateParam(lastIndexDate);
+	} else {
+		setMinDateParam($(`[data-date-count = ${listItemDateIndex}]`));
+	}
+
 }
 
 function getDateCount() {
@@ -69,7 +81,6 @@ function getDateCount() {
 
 function updateDateCount(deletedObj) {
 	let deletedIndex = $(deletedObj).attr("data-date-count");
-
 	$("[data-date-count]").each(function() {
 		let dataIndex = $(this).attr("data-date-count");
 
@@ -83,8 +94,6 @@ function findDateValue(obj) {
 	let dateString = '';
 	let firstCall = $(obj).closest(".price-room__group");
 	let prevNode = '';
-
-	debugger
 
 	prevNode = firstCall.prev(".price-room__group");
 
@@ -107,7 +116,7 @@ function findDateValue(obj) {
 				dateString = findDateValue(nextDate);
 			}
 		} else {
-			dateString = '';
+			dateString = currentYear;
 		}
 	}
 	return dateString;
@@ -118,7 +127,8 @@ function setMinDateParam(obj) {
 	// Правильный формат даты 2019-11-02
 	let objIndex = $(obj).attr("data-date-count");
 	let objValue = {};
-	
+
+
 	if(!$(obj).val()) {
 		objValue = new Date(findDateValue(obj));
 	} else {

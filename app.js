@@ -20,10 +20,30 @@ $(document).ready(function(){
 });
 
 
-
-
-
 /* Functions */
+function notifyShow(obj, type, text) {
+
+	$(document).on("click", ".form_notify", function() {
+		$(this).addClass('animate-reverse');
+	});
+
+	obj.css("position", "relative");
+
+	$("<div class=\"form_notify animate\"></div>").appendTo(obj).addClass(type).text(text);
+	let elem = obj.find(".form_notify");
+
+	setTimeout(function() {
+		elem.addClass('animate-reverse');
+	}, 3000);
+
+	setTimeout(function() {
+		elem.remove();
+	}, 5000);
+
+
+}
+
+
 function addRow() {
 	let lastCount = getDateCount();
 	let baseRow = '<li class="price-room__period-item">' +
@@ -62,6 +82,7 @@ function removeRow(button) {
 	if(lastIndexDate.length > 0) {
 		setMinDateParam(lastIndexDate);
 	} else {
+		$(`[data-date-count = ${listItemDateIndex}]`).attr("min", currentYear);
 		setMinDateParam($(`[data-date-count = ${listItemDateIndex}]`));
 	}
 
@@ -153,17 +174,20 @@ function setMinDateParam(obj) {
 
 	$("[data-date-count]").each(function() {
 		let dataIndex = $(this).attr("data-date-count");
+		let dataValue = $(this).val();
 
 		if(+dataIndex > +objIndex) {
-			$(this).attr("min", newDate);
-
 			let eachValue = $(this).val();
-
 			if(eachValue) {
 				let eachDate = new Date(eachValue);
 				if(eachDate <= nextDate) {
 					$(this).val("");
+					$(this).attr("min", newDate);
+				} else {
+					return false;
 				}
+			} else {
+				$(this).attr("min", newDate);
 			}
 		}
 	});
@@ -186,20 +210,30 @@ $(document).on("submit", "#prices_periods", function(e) {
 	e.preventDefault();
 	let dataPeriod = [];
 	let error = false;
+	let form = $(this);
 
 
 	$("#prices_periods").find(".price-room__period-item").each(function() {
 		let dateObj = {};
 
+		if (error) return false;
+
 		$(this).find("[data-date-count]").each(function() {
 			if($(this).val()) {
-				Object.assign(dateObj, {[$(this).attr("name")]: $(this).val()});
+				Object.assign(dateObj, {
+					[$(this).attr("name")] : {
+						"value" : $(this).val(),
+						"min" : $(this).attr("min"),
+						"count" : $(this).attr("data-date-count"),
+					},
+				});
 			} else {
 				alert("Заполните все поля. Отсутствует поле № " + $(this).attr("data-date-count"));
 				error = true;
 				return false;
 			}
 		});
+
 
 		dataPeriod.push(dateObj);
 	});
@@ -208,15 +242,30 @@ $(document).on("submit", "#prices_periods", function(e) {
 		return false;
 	}
 
+
 	$.ajax({
 		method: "POST",
 		url: "./model.php",
 		data: {
 			"periods" : dataPeriod,
 			"hotel_id" : "1",
+			"action" : "saveHeadData"
 		},
-		success: function( msg ) {
-			console.log(msg);
+		success: function(data) {
+
+			responseText = "";
+			responseType = "";
+
+			if(data.status === 'success') {
+				responseText = data.text;
+				responseType = data.status;
+			 } else {
+				responseText = "Неизвестная ошибка";
+				responseType = "error";
+			}
+
+			notifyShow(form, responseType, responseText);
+
 		},
 		error: function(data, errorThrown) {
        alert('request failed : '+ errorThrown);

@@ -12,6 +12,11 @@ a[class*="js"],
     cursor: pointer;
 }
 
+#prices_periods {
+    position: relative;
+    overflow: hidden;
+}
+
 .button {
     -webkit-transition: background-color 0.3s, color 0.3s, box-shadow 0.3s, border-color 0.3s;
     -moz-transition: background-color 0.3s, color 0.3s, box-shadow 0.3s, border-color 0.3s;
@@ -252,5 +257,64 @@ a[class*="js"],
     .room-table__cell {
         padding: 2px 16px;
         display: block;
+    }
+}
+
+.form_notify {
+    position: absolute;
+    right: -250px;
+    max-width: 250px;
+    opacity: 1;
+    padding: 15px;
+    box-sizing: border-box;
+    bottom: 80px;
+    font-size: 16px;
+    background-color: rgba(0, 0, 0, .1);
+    border-radius: 2px;
+    line-height: 1.4;
+    transition: all 0.25s ease-in-out;
+}
+
+.form_notify.error {
+    background-color: rgba(188, 24, 24, 0.8);
+    color: #fff;
+}
+
+.form_notify.success {
+    background-color: rgba(6, 153, 40, 0.8);
+    color: #fff;
+}
+
+.form_notify.animate {
+    animation: move-open-to-Left 1s ease-in-out;
+    -webkit-animation: move-open-to-Left 1s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+.form_notify.animate-reverse {
+    animation: move-close-to-right 1s ease-in-out;
+    -webkit-animation: move-close-to-right 1s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+@keyframes move-open-to-Left {
+    0% {
+        right: -250px;
+        opacity: 0;
+    }
+    100% {
+        right: 20px;
+        opacity: 1;
+    }
+}
+
+@keyframes move-close-to-right {
+    0% {
+        right: 20px;
+        opacity: 1;
+    }
+    100% {
+        right: -250px;
+        opacity: 0;
     }
 }

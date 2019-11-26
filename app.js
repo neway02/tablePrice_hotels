@@ -1,7 +1,14 @@
 
-const currentYear = "2020-01-01";
+const currentYear = "2019-01-01";
 let datePickers = [];
 
+
+function isAN(value) {
+	if(value instanceof Number)
+		value = value.valueOf();
+
+		return isFinite(value) && value === parseInt(value, 10);
+}
 
 
 $(document).ready(function(){
@@ -19,13 +26,15 @@ $(document).ready(function(){
 
 });
 
+$(document).on("click", ".form_notify", function() {
+	$(this).addClass('animate-reverse');
+	setTimeout(function() {
+		$(this).remove();
+	}, 5000);
+});
 
 /* Functions */
 function notifyShow(obj, type, text) {
-
-	$(document).on("click", ".form_notify", function() {
-		$(this).addClass('animate-reverse');
-	});
 
 	obj.css("position", "relative");
 
@@ -39,13 +48,13 @@ function notifyShow(obj, type, text) {
 	setTimeout(function() {
 		elem.remove();
 	}, 5000);
-
-
 }
 
 
 function addRow() {
 	let lastCount = getDateCount();
+	lastCount = isAN(lastCount) ? lastCount : 0;
+
 	let baseRow = '<li class="price-room__period-item">' +
 					'<div class="price-room__form">' +
 						'<div class="price-room__group js-date-container">' +
@@ -215,11 +224,11 @@ $(document).on("submit", "#prices_periods", function(e) {
 
 	$("#prices_periods").find(".price-room__period-item").each(function() {
 		let dateObj = {};
-
 		if (error) return false;
 
 		$(this).find("[data-date-count]").each(function() {
 			if($(this).val()) {
+
 				Object.assign(dateObj, {
 					[$(this).attr("name")] : {
 						"value" : $(this).val(),
@@ -227,6 +236,7 @@ $(document).on("submit", "#prices_periods", function(e) {
 						"count" : $(this).attr("data-date-count"),
 					},
 				});
+
 			} else {
 				alert("Заполните все поля. Отсутствует поле № " + $(this).attr("data-date-count"));
 				error = true;

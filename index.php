@@ -16,6 +16,12 @@
 
 <h1 class="main-heading">Динамическое добавление элементов</h1>
 
+<?php
+
+	require_once("./functions.php");
+	require_once("./model.php");
+
+?>
 
 <?php
 
@@ -30,10 +36,32 @@
 
 ?>
 
+
+<?php
+
+$date_now = date("Y-m-d");
+$dataHeading = json_decode(getDataHeading(1), TRUE);
+
+
+foreach($dataHeading as $date) {
+	if(isBetweenDates(new Datetime($date_now), new Datetime($date["dateFrom"]["value"]), new Datetime($date["dateTo"]["value"]))) {
+
+		print_r($date);
+
+	}
+}
+
+?>
+
+
+<div class="current_date">
+	Текущая дата - <?=$date_now;?> <br>
+	Текущая цена - ТАКАЯ
+</div>
+
+
 <!-- 
-1. Добавить ответ в модели
 2. Куки стартовая минимальная величина
-3. При удачном ajax показать сохранено, также ошибка если
 4. Короткие названия в базу
 5. Вывод таблиц -->
 

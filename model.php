@@ -59,7 +59,4 @@ function getDataHeading($hotel_id) {
 
 
 
-
-
-
 ?>

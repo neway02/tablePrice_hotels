@@ -1,6 +1,8 @@
 <?
 
+require_once("./model.php");
 
+$dataHeading = json_decode(getDataHeading(1), TRUE);
 
 
 ?>
@@ -8,18 +10,32 @@
 <div class="tables-container">
     <div class="room-table">
         <div class="room-table__row room-table__header blue">
-            <div class="room-table__cell">
+
+						<div class="room-table__cell">
                 Периоды
             </div>
-            <div class="room-table__cell">
-                01.06 - 14.06
-            </div>
-            <div class="room-table__cell">
-                17.06 - 15.07
-            </div>
-            <div class="room-table__cell">
-                16.07 - 1.09
-            </div>
+
+						<?php	if(is_array($dataHeading) && !empty($dataHeading)) :
+
+							foreach($dataHeading as $row) :
+
+								$dateFrom = date("d.m", strtotime($row["dateFrom"]["value"]));
+								$dateTo = date("d.m", strtotime($row["dateTo"]["value"]));
+						
+						?>
+
+	            <div class="room-table__cell">
+								<?php echo $dateFrom . "-" . $dateTo;?>
+	            </div>
+
+						<?php
+	
+							endforeach;
+
+						endif;
+						
+						?>
+
         </div>
         <div class="room-table__row">
             <div class="room-table__cell" data-title="Цена">

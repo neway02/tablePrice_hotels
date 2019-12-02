@@ -1,27 +1,30 @@
 <?php
 
+$group_id = 1;
+
+
 require_once("./model.php");
 
-$dataHeading = json_decode(getDataHeading(1), TRUE);
+$dataHeading = getDataHeading($group_id);
 
 ?>
 
 
 <form id="prices_periods" method="post">
-    <input type="hidden" name="hotel_id" value="">
+    <input type="hidden" name="group_id" value="1">
     <ul id="price-room__period-list" class="price-room__period-list">
 
 			<?php	if(!is_array($dataHeading) || empty($dataHeading)) : ?>
 
-				<li class="price-room__period-item">
+				<li class="price-room__period-item" data-date-count=1>
 					<div class="price-room__form">
 							<div class="price-room__group js-date-container">
 									<span class="price-room__group-text">с</span>
-									<input type="date" name="dateFrom" data-date-count=1 min="2020-01-01">
+									<input type="date" name="date_from">
 							</div>
 							<div class="price-room__group js-date-container">
 									<span class="price-room__group-text">по</span>
-									<input type="date" name="dateTo" data-date-count=2 min="2020-01-01">
+									<input type="date" name="date_to">
 							</div>
 					</div>
 					<a class="price-room__period-item-del js-delete-period" href="javascript:void(0);">
@@ -35,31 +38,28 @@ $dataHeading = json_decode(getDataHeading(1), TRUE);
 
 						foreach($dataHeading as $row) {
 
-							$dateFrom = $row["dateFrom"];
-							$dateTo = $row["dateTo"];
+							$dateFrom = $row["date_from"];
+							$dateTo = $row["date_to"];
+							$dateCount = $row["count"];
 
 							?>
 
-									<li class="price-room__period-item">
+									<li class="price-room__period-item" data-date-count=<?=$dateCount;?>>
 										<div class="price-room__form">
 												<div class="price-room__group js-date-container">
 														<span class="price-room__group-text">с</span>
 														<input
 															type="date"
-															name="dateFrom"
-															data-date-count=<?=$dateFrom["count"];?>
-															min="<?=$dateFrom["min"];?>"
-															value="<?=$dateFrom["value"];?>"
+															name="date_from"
+															value="<?=$dateFrom;?>"
 														>
 												</div>
 												<div class="price-room__group js-date-container">
 														<span class="price-room__group-text">по</span>
 														<input
 															type="date"
-															name="dateTo"
-															data-date-count=<?=$dateTo["count"];?>
-															min="<?=$dateTo["min"];?>"
-															value="<?=$dateTo["value"];?>"
+															name="date_to"
+															value="<?=$dateTo;?>"
 														>
 												</div>
 										</div>
@@ -84,7 +84,7 @@ $dataHeading = json_decode(getDataHeading(1), TRUE);
                 <span class="icon-plus"></span>Добавить период
             </a>
         </div>
-        <button class="button button-form">Сохранить</button>
+        <button type="submit" class="button button-form">Сохранить</button>
 		</div>
 </form>
 

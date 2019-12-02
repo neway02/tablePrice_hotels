@@ -3,7 +3,7 @@ const currentYear = "2019-01-01";
 let datePickers = [];
 
 
-function isAN(value) {
+function isNumber(value) {
 	if(value instanceof Number)
 		value = value.valueOf();
 
@@ -43,27 +43,27 @@ function notifyShow(obj, type, text) {
 
 	setTimeout(function() {
 		elem.addClass('animate-reverse');
-	}, 3000);
+	}, 1600);
 
 	setTimeout(function() {
 		elem.remove();
-	}, 5000);
+	}, 4000);
 }
 
 
 function addRow() {
 	let lastCount = getDateCount();
-	lastCount = isAN(lastCount) ? lastCount : 0;
+	lastCount = isNumber(lastCount) ? lastCount : 0;
 
-	let baseRow = '<li class="price-room__period-item">' +
+	let baseRow = '<li class="price-room__period-item" data-date-count=' + (lastCount + 1) + '>' +
 					'<div class="price-room__form">' +
 						'<div class="price-room__group js-date-container">' +
 							'<span class="price-room__group-text">с</span>' +
-							'<input type="date" name="dateFrom" data-date-count='+(lastCount+1)+'>' +
+							'<input type="date" name="date_from">' +
 						'</div>' +
 						'<div class="price-room__group js-date-container">' +
 							'<span class="price-room__group-text">по</span>' +
-							'<input type="date" name="dateTo" data-date-count='+(lastCount+2)+'>' +
+							'<input type="date" name="date_to">' +
 						'</div>' +
 					'</div>' +
 					'<a class="price-room__period-item-del js-delete-period" href="javascript:void(0);">' +
@@ -80,19 +80,21 @@ function addRow() {
 
 function removeRow(button) {
 	let listItem = button.closest(".price-room__period-item");
-	let listItemDate = listItem.find("[data-date-count]").eq(0);
-	let listItemDateIndex = listItemDate.attr("data-date-count");
+	let listItemIndex = listItem.attr("data-date-count");
+	let listItemDate = listItem.find("[type=date]").eq(0);
 
-	updateDateCount(listItemDate);
+	updateIndexCount(listItem);
 	listItem.remove();
 
-	let lastIndexDate = $(`[data-date-count = ${listItemDateIndex-1}]`);
+	let lastListIndex = $(`[data-date-count = ${listItemIndex-1}]`);
 
-	if(lastIndexDate.length > 0) {
-		setMinDateParam(lastIndexDate);
+
+	if(lastListIndex.length > 0) {
+		setMinDateParam(lastListIndex);
 	} else {
-		$(`[data-date-count = ${listItemDateIndex}]`).attr("min", currentYear);
-		setMinDateParam($(`[data-date-count = ${listItemDateIndex}]`));
+		let lastList = $(`[data-date-count = ${listItemIndex}]`);
+		lastList.find("[name=date_from]").val(currentYear).attr("min", currentYear);
+		setMinDateParam(lastList);
 	}
 
 }
@@ -109,13 +111,13 @@ function getDateCount() {
 	return Math.max.apply(null, countArr)
 }
 
-function updateDateCount(deletedObj) {
+function updateIndexCount(deletedObj) {
 	let deletedIndex = $(deletedObj).attr("data-date-count");
 	$("[data-date-count]").each(function() {
 		let dataIndex = $(this).attr("data-date-count");
 
 		if(+dataIndex > +deletedIndex) {
-			$(this).attr("data-date-count", +dataIndex-2);
+			$(this).attr("data-date-count", +dataIndex-1);
 		}
 	});
 }
@@ -128,7 +130,7 @@ function findDateValue(obj) {
 	prevNode = firstCall.prev(".price-room__group");
 
 	if (prevNode.length > 0) {
-		let prevDate = prevNode.find("[data-date-count]");
+		let prevDate = prevNode.find("[type=date]");
 		if(prevDate.val()) {
 			dateString = prevDate.val();
 		} else {
@@ -139,7 +141,7 @@ function findDateValue(obj) {
 		
 		if(prevGroup.length > 0) {
 			let nextCall = prevGroup.find(".price-room__group").last();
-			let nextDate = nextCall.find("[data-date-count]");
+			let nextDate = nextCall.find("[type=date]");
 			if(nextDate.val()) {
 				dateString = nextDate.val();
 			} else {
@@ -156,13 +158,27 @@ function setMinDateParam(obj) {
 
 	// Правильный формат даты 2019-11-02
 	let objIndex = $(obj).attr("data-date-count");
+	let dateObj = '';
+	let fromDateClicked = false;
+
+	let fromDate = obj.find("[name=date_from]");
+	let toDate = obj.find("[name=date_to]");
+	let formDateValue = fromDate.val();
+	let toDateValue = toDate.val();
+
+	if(formDateValue && formDateValue >= toDateValue) {
+		dateObj = fromDate;
+		fromDateClicked = true;
+	} else {
+		dateObj = toDate;
+	}
+
 	let objValue = {};
 
-
-	if(!$(obj).val()) {
-		objValue = new Date(findDateValue(obj));
+	if(!$(dateObj).val()) {
+		objValue = new Date(findDateValue(dateObj));
 	} else {
-		objValue = new Date($(obj).val());
+		objValue = new Date($(dateObj).val());
 	}
 
 	let nextDate = new Date(objValue.getTime() + (24 * 60 * 60 * 1000));
@@ -181,23 +197,29 @@ function setMinDateParam(obj) {
 	
 	let newDate = objYear + "-" + objMonth + "-" + objDay;
 
+	if (fromDateClicked) {
+		toDate.val("").attr("min", newDate);
+	}
+
 	$("[data-date-count]").each(function() {
 		let dataIndex = $(this).attr("data-date-count");
-		let dataValue = $(this).val();
 
 		if(+dataIndex > +objIndex) {
-			let eachValue = $(this).val();
-			if(eachValue) {
-				let eachDate = new Date(eachValue);
-				if(eachDate <= nextDate) {
-					$(this).val("");
-					$(this).attr("min", newDate);
+			let validList = $(this);
+			validList.find("[type=date]").each(function() {
+				let eachValue = $(this).val();
+				if(eachValue) {
+					let eachDate = new Date(eachValue);
+					if(eachDate <= nextDate) {
+						$(this).val("");
+						$(this).attr("min", newDate);
+					} else {
+						return false;
+					}
 				} else {
-					return false;
+					$(this).attr("min", newDate);
 				}
-			} else {
-				$(this).attr("min", newDate);
-			}
+			});
 		}
 	});
 }
@@ -211,16 +233,20 @@ $(document).on("click", ".js-delete-period", function() {
   removeRow($(this));
 });
 
-$(document).on("change", "[data-date-count]", function() {
-  setMinDateParam($(this));
+$(document).on("change", "[type=date]", function() {
+	let periodList = $(this).closest("[data-date-count]");
+  setMinDateParam(periodList);
 });
+
+
+
+
 
 $(document).on("submit", "#prices_periods", function(e) {
 	e.preventDefault();
 	let dataPeriod = [];
 	let error = false;
 	let form = $(this);
-
 
 	$("#prices_periods").find(".price-room__period-item").each(function() {
 		let dateObj = {};
@@ -252,13 +278,12 @@ $(document).on("submit", "#prices_periods", function(e) {
 		return false;
 	}
 
-
 	$.ajax({
 		method: "POST",
 		url: "./model.php",
 		data: {
 			"periods" : dataPeriod,
-			"hotel_id" : "1",
+			"group_id" : "1",
 			"action" : "saveHeadData"
 		},
 		success: function(data) {
@@ -266,11 +291,13 @@ $(document).on("submit", "#prices_periods", function(e) {
 			responseText = "";
 			responseType = "";
 
-			if(data.status === 'success') {
+			console.log(data);
+
+			if(data.status) {
 				responseText = data.text;
 				responseType = data.status;
 			 } else {
-				responseText = "Неизвестная ошибка";
+				responseText = data ? data : "Неизвестная ошибка";
 				responseType = "error";
 			}
 
@@ -281,4 +308,59 @@ $(document).on("submit", "#prices_periods", function(e) {
        alert('request failed : '+ errorThrown);
     }
 	})
+});
+
+
+$(document).on("click", "#button-tables-save", function() {
+
+	let data = [];
+	let container = $("#tables-container");
+	let error = false;
+
+	container.find(".room-table").each(function() {
+		
+		let roomObj = {};
+
+		if (error) return false;
+
+		room_id = $(this).attr("data-room");
+
+		let rowMain = $(this).find(".room-table__row-main");
+		let rowSub = $(this).find(".room-table__row-main");
+
+		rowMain.find(".table-input-date").each(function() {
+			let value = $(this).val();
+			let period = $(this).closest(".room-table__cell").attr("data-title");
+
+			if(value == '') {
+				value = 0;
+			}
+
+			value = parseInt(value);
+
+			if(value && isNumber(value)) {
+
+			} else {
+				error = true;
+				alert("В таблице допускаются только числовые значения");
+				console.log("error", value);
+				console.log("error", isNumber(value));
+			}
+
+			if (error) return false;
+
+			Object.assign(roomObj, {[period] : value});
+
+		});
+
+		roomObj["id"] = room_id;
+
+		console.log("roomObj", roomObj);
+
+	});
+
+	if (error) return false;
+
+	console.log("Проверка на ошибку");
+
 });

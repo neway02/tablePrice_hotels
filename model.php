@@ -21,11 +21,12 @@ function saveHeadData() {
 	$hotel_id = (isset($_POST["hotel_id"])) ? $_POST["hotel_id"] : false;
 
 	if(!$hotel_id) {
-		die("Нет идентификатора гостиницы");
+		$response = array("status" => "error", "text" => "Нет идентификатора гостиницы");
+		die($response);
 	}
 	
-	$req = $connect->prepare("INSERT INTO `table_head` (`hotel_id`,`value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `hotel_id` = VALUES(`hotel_id`), `value` = VALUES(`value`);");
-	if($req->execute(array($hotel_id, $periods))) {
+	$req = $connect->prepare("UPDATE `nwyt-group` SET `head_content` = (?) WHERE `hotel_id` = ?;");
+	if($req->execute(array($periods, $hotel_id))) {
 
 		$response = array("status" => "success", "text" => "Запись успешно сохранена");
 
@@ -41,16 +42,21 @@ function saveHeadData() {
 }
 
 
-function getDataHeading($hotel_id) {
+function getDataHeading($group_id) {
 	global $connect;
 
-	if(!$hotel_id) {
+	if(!$group_id) {
 		die("Нет идентификатора гостиницы");
 	}
 
-	$req = $connect->prepare("SELECT value FROM `table_head` WHERE `hotel_id` = ?");
-	$req->execute(array($hotel_id));
-	$data = $req->fetchColumn();
+	$req = $connect->prepare("SELECT date_from, date_to, count FROM `nwty-periods` WHERE `group_id` = ?");
+	$req->execute(array($group_id));
+	$data = $req->fetchAll();
+
+
+	echo "<pre>";
+	print_r($data);
+	echo "</pre>";
 
 	return $data;
 

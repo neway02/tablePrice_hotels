@@ -1,6 +1,7 @@
 <?php
 
 require_once("./config.php");
+require_once("./functions.php");
 
 
 if(isset($_POST['action']) && !empty($_POST['action'])) {
@@ -17,16 +18,22 @@ function saveHeadData() {
 	$response = array();
 
 	//Отправляем новые значения для периодов дат в Базу Данных
-	$periods = (isset($_POST["periods"]) && is_array($_POST["periods"])) ? json_encode($_POST["periods"]) : '';
-	$hotel_id = (isset($_POST["hotel_id"])) ? $_POST["hotel_id"] : false;
+	$periods = (isset($_POST["periods"])) ? json_decode($_POST["periods"]) : '';
+	$group_id = (isset($_POST["group_id"])) ? $_POST["group_id"] : false;
 
-	if(!$hotel_id) {
+	if(!$group_id) {
 		$response = array("status" => "error", "text" => "Нет идентификатора гостиницы");
 		die($response);
 	}
+
+	if (!is_array($periods)) {
+		$response = array("status" => "error", "text" => "Неверный формат данных периодов");
+		die($response);
+	}
+
 	
-	$req = $connect->prepare("UPDATE `nwyt-group` SET `head_content` = (?) WHERE `hotel_id` = ?;");
-	if($req->execute(array($periods, $hotel_id))) {
+	$req = $connect->prepare("UPDATE `nwty-periods` SET `head_content` = (?) WHERE `hotel_id` = ?;");
+	if($req->execute(array($periods, $group_id))) {
 
 		$response = array("status" => "success", "text" => "Запись успешно сохранена");
 

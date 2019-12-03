@@ -248,28 +248,28 @@ $(document).on("submit", "#prices_periods", function(e) {
 	let error = false;
 	let form = $(this);
 
-	$("#prices_periods").find(".price-room__period-item").each(function() {
-		let dateObj = {};
-		if (error) return false;
-
-		$(this).find("[data-date-count]").each(function() {
-			if($(this).val()) {
-
-				Object.assign(dateObj, {
-					[$(this).attr("name")] : {
-						"value" : $(this).val(),
-						"min" : $(this).attr("min"),
-						"count" : $(this).attr("data-date-count"),
-					},
-				});
-
-			} else {
-				alert("Заполните все поля. Отсутствует поле № " + $(this).attr("data-date-count"));
+	$("#prices_periods").find("[type=date]").each(function() {
+		let dateValue = $(this).val();
+		if (!dateValue) {
+				alert("Заполните все поля. Отсутствует поле в строке № " + $(this).closest("[data-date-count]").attr("data-date-count"));
 				error = true;
 				return false;
 			}
-		});
+	});
 
+	if (error) return false;
+
+	$("#prices_periods").find("[data-date-count]").each(function() {
+		
+		let date_from = $(this).find("[name=date_from]").val();
+		let date_to = $(this).find("[name=date_to]").val();
+		let count = $(this).attr("data-date-count");
+	
+		let dateObj = {
+			date_from,
+			date_to,
+			count
+		};
 
 		dataPeriod.push(dateObj);
 	});
@@ -282,7 +282,7 @@ $(document).on("submit", "#prices_periods", function(e) {
 		method: "POST",
 		url: "./model.php",
 		data: {
-			"periods" : dataPeriod,
+			"periods" : JSON.stringify(dataPeriod),
 			"group_id" : "1",
 			"action" : "saveHeadData"
 		},

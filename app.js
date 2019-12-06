@@ -93,7 +93,12 @@ function removeRow(button) {
 		setMinDateParam(lastListIndex);
 	} else {
 		let lastList = $(`[data-date-count = ${listItemIndex}]`);
-		lastList.find("[name=date_from]").val(currentYear).attr("min", currentYear);
+		let lastListDateValue = lastList.find("[name=date_from]").val();
+
+		if(!lastListDateValue) {
+			lastList.find("[name=date_from]").val(currentYear).attr("min", currentYear);
+		}
+
 		setMinDateParam(lastList);
 	}
 

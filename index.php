@@ -32,13 +32,14 @@
 
 <?php
 
-	require_once("./parts/table.php");
+	// require_once("./parts/table.php");
 
 ?>
 
 
 <?php
 
+/*
 $date_now = date("Y-m-d");
 $dataHeading = json_decode(getDataHeading(1), TRUE);
 
@@ -51,7 +52,6 @@ foreach($dataHeading as $date) {
 	}
 }
 
-?>
 
 
 <div class="current_date">
@@ -59,6 +59,8 @@ foreach($dataHeading as $date) {
 	Текущая цена - ТАКАЯ
 </div>
 
+*/
+?>
 
 <!-- 
 - Куки стартовая минимальная величина

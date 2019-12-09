@@ -5,12 +5,28 @@ $room_id = 1;
 
 require_once("./model.php");
 
-$dataHeading = json_decode(getDataHeading($hotel_id), TRUE);
+$dataHeading = getDataTable($hotel_id);
 
+echo "<pre>";
+print_r($dataHeading);
+echo "</pre>";
 
 ?>
 
 <div id="tables-container" class="tables-container">
+
+
+
+
+
+
+
+
+
+
+
+
+
     <div class="room-table" data-room="2">
         <div class="room-table__row room-table__header blue">
 
@@ -101,11 +117,9 @@ $dataHeading = json_decode(getDataHeading($hotel_id), TRUE);
 
 		</div>
 
-	</div>
-
-
 
 	<div class="bottom-container">
 	     <button id="button-tables-save" class="button button-form button-tables-save">Сохранить</button>
 	</div>
+
 </div>

@@ -229,6 +229,39 @@ function setMinDateParam(obj) {
 	});
 }
 
+function addTable() {
+
+	form = $("#tables-container");
+
+	$.ajax({
+		method: "POST",
+		url: "./model.php",
+		data: {
+			"group_id" : "1",
+			"action" : "createTable"
+		},
+		success: function(data) {
+
+			responseText = "";
+			responseType = "";
+
+			if(data.status) {
+				responseText = data.text;
+				responseType = data.status;
+			 } else {
+				responseText = data ? data : "Неизвестная ошибка";
+				responseType = "error";
+			}
+
+			notifyShow(form, responseType, responseText);
+
+		},
+		error: function(data, errorThrown) {
+       alert('request failed : '+ errorThrown);
+    }
+	})
+}
+
 /* Events */
 $(document).on("click", ".js-add-period", function() {
 	addRow();
@@ -243,7 +276,9 @@ $(document).on("change", "[type=date]", function() {
   setMinDateParam(periodList);
 });
 
-
+$(document).on("click", "#add_new_table", function() {
+  addTable();
+});
 
 
 

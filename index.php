@@ -32,9 +32,12 @@
 
 <?php
 
-	// require_once("./parts/table.php");
+	require_once("./parts/table.php");
 
 ?>
+
+
+<button id="add_new_table">Добавить таблицу</button>
 
 
 <?php

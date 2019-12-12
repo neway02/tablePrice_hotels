@@ -5,7 +5,7 @@ $group_id = 1;
 
 require_once("./model.php");
 
-$dataHeading = getDataHeading($group_id);
+$dataHeading = getDataTable($group_id);
 
 ?>
 

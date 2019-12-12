@@ -89,10 +89,53 @@ function createTable() {
 		die($response);
 	}
 
-	$sql = "INSERT INTO `nwyt_tables` (`group_id`) VALUES (?)";
-	$req = $connect->prepare($sql);
+	$sql_periods = "SELECT count, id FROM `nwyt_periods` WHERE group_id = ?";
+	$req_per = $connect->prepare($sql_periods);
+	$req_per->execute(array($group_id));
+	$data_periods = $req_per->fetchAll();
 
-	if($req->execute(array($group_id))) {
+	if(empty($data_periods)) {
+		$response = array("status" => "error", "text" => "Отсутствуют периоды");
+		die($response);
+	}
+
+	$sql_table_id = "INSERT INTO `nwyt_tables` (`group_id`) VALUES (?)";
+	$req_id = $connect->prepare($sql_table_id);
+	$responseID = $req_id->execute(array($group_id));
+	$last_table_id = $connect->lastInsertId();
+
+
+	$sql_cells = "INSERT INTO `nwyt_prices` (`value`, `row`, `table_id`, `period_id`) VALUES ";
+	$binding_values = array();
+	for($i=0; $i < count($data_periods); $i++) {
+		if($i > 0) $sql_cells .= ",";
+
+		$sql_cells .= "(?, ?, ?, ?)";
+
+		$type = 1;
+
+		array_push($binding_values, null);
+		array_push($binding_values, $type);
+		array_push($binding_values, $last_table_id);
+		array_push($binding_values, $data_periods[$i]["id"]);
+	}
+	for($k=0; $k < count($data_periods); $k++) {
+		$sql_cells .= ",";
+
+		$sql_cells .= "(?, ?, ?, ?)";
+
+		$type = 2;
+
+		array_push($binding_values, null);
+		array_push($binding_values, $type);
+		array_push($binding_values, $last_table_id);
+		array_push($binding_values, $data_periods[$k]["id"]);
+	}
+	$sql_cells .= ";";
+	$req_cells = $connect->prepare($sql_cells);
+	$responseCells = $req_cells->execute($binding_values);
+
+	if($responseID && $responseCells) {
 
 		$response = array("status" => "success", "text" => "Запись успешно сохранена");
 
@@ -108,25 +151,6 @@ function createTable() {
 }
 
 
-function create_arrays_by($arr) {
-	$result = array();
-	foreach($arr as $item) {
-
-		$period_count = array(
-			"period_id" => $item['period_id'],
-			"date_from" => $item['date_from'],
-			"date_to" => $item['date_to'],
-			"type" => $item['type'],
-			"price" => $item['price']
-		);
-
-		$result["table_".$item['table_id']]["period_".$item['period_count']] = $period_count;
-
-	}
-	return $result;
-}
-
-
 function getDataTable($group_id) {
 	global $connect;
 
@@ -135,31 +159,37 @@ function getDataTable($group_id) {
 		die($response);
 	}
 
-	 $sql	= "SELECT
-						tt.group_id,
-            tt.id as table_id,
-            prt.id as period_id,
-            prt.count as period_count,
-            prt.date_from,
-				    prt.date_to,
-            pt.value as price,
-            pt.type
-					FROM nwyt_tables tt
-              	LEFT JOIN nwyt_periods prt
-		            ON tt.group_id = prt.group_id
-                          
-                LEFT JOIN nwyt_prices pt
-		            ON prt.id = pt.period_id
-					WHERE tt.group_id = ?";
+	 $sql	= "SELECT 
+						 lt.table_id,
+						 lt.period_id,
+						 lt.period_count,
+						 lt.date_from,
+						 lt.date_to,
+						 pp.value as price,
+						 pp.row as table_row
+	 				FROM
+
+						(SELECT
+								tt.id as table_id,
+								prt.id as period_id,
+								prt.count as period_count,
+								prt.date_from,
+								prt.date_to
+							FROM nwyt_tables tt
+								RIGHT JOIN nwyt_periods prt
+								ON tt.group_id = prt.group_id
+							WHERE tt.group_id = ?) as lt
+
+						LEFT JOIN nwyt_prices pp
+						 ON (lt.table_id = pp.table_id AND lt.period_id = pp.period_id )
+											 
+					ORDER BY lt.table_id";
 
 	$req = $connect->prepare($sql);
 	$req->execute(array($group_id));
 	$data = $req->fetchAll();
 
-
 	return(create_arrays_by($data));
-
-	return $data;
 
 }
 

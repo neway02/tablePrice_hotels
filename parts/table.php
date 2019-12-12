@@ -1,14 +1,14 @@
 <?
 
-$hotel_id = 1;
+$group_id = 1;
 $room_id = 1;
 
 require_once("./model.php");
 
-$dataHeading = getDataTable($hotel_id);
+$data_tables = getDataTable($group_id);
 
 echo "<pre>";
-print_r($dataHeading);
+print_r($data_tables);
 echo "</pre>";
 
 ?>
@@ -16,30 +16,22 @@ echo "</pre>";
 <div id="tables-container" class="tables-container">
 
 
+	<?php	foreach ($data_tables as $id => $data) : ?>
 
+		<?php $id = explode("_", $id); ?>
 
-
-
-
-
-
-
-
-
-
-    <div class="room-table" data-room="2">
+		<div class="room-table" data-table-id="<?php echo $id[1]; ?>">
         <div class="room-table__row room-table__header blue">
 
 						<div class="room-table__cell">
                 Периоды
             </div>
 
-						<?php	if(is_array($dataHeading) && !empty($dataHeading)) :
+						<?php	foreach($data as $row) :
 
-							foreach($dataHeading as $row) :
 
-								$dateFrom = date("d.m", strtotime($row["dateFrom"]["value"]));
-								$dateTo = date("d.m", strtotime($row["dateTo"]["value"]));
+								$dateFrom = date("d.m", strtotime($row["date_from"]));
+								$dateTo = date("d.m", strtotime($row["date_to"]));
 						
 						?>
 
@@ -47,26 +39,20 @@ echo "</pre>";
 								<?php echo $dateFrom . "-" . $dateTo;?>
 	            </div>
 
-						<?php
-	
-							endforeach;
+						<?php	endforeach;	?>
 
-						endif;
-						
-						?>
-
-        </div>
+				</div>
+				
         <div class="room-table__row room-table__row-main">
             <div class="room-table__cell" data-title="Цена, ₽">
                 За номер
 						</div>
 						
-						<?php	if(is_array($dataHeading) && !empty($dataHeading)) :
+						<?php	foreach($data as $row) :
 
-								foreach($dataHeading as $row) :
-
-									$dateFrom = date("d.m", strtotime($row["dateFrom"]["value"]));
-									$dateTo = date("d.m", strtotime($row["dateTo"]["value"]));
+									$dateFrom = date("d.m", strtotime($row["date_from"]));
+									$dateTo = date("d.m", strtotime($row["date_to"]));
+									$price = isset($row["price"]) && !empty($row["price"]) ? $row["price"] : '';
 
 								?>
 
@@ -74,16 +60,10 @@ echo "</pre>";
 										class="room-table__cell"
 										data-title="<?php echo $dateFrom . "-" . $dateTo; ?>"
 									>
-			                <input class="table-input-date" type="text" value="">
+			                <input class="table-input-date" type="text" value="<?php echo $price; ?>">
 			            </div>
 
-								<?php
-
-								endforeach;
-
-								endif;
-
-						?>
+						<?php	endforeach; ?>
 
         </div>
         <div class="room-table__row room-table__row-sub">
@@ -91,35 +71,27 @@ echo "</pre>";
                 За доп. место
 						</div>
 						
-						<?php	if(is_array($dataHeading) && !empty($dataHeading)) :
+						<?php	foreach($data as $row) :
 
-							foreach($dataHeading as $row) :
-
-								$dateFrom = date("d.m", strtotime($row["dateFrom"]["value"]));
-								$dateTo = date("d.m", strtotime($row["dateTo"]["value"]));
+							$dateFrom = date("d.m", strtotime($row["date_from"]));
+							$dateTo = date("d.m", strtotime($row["date_to"]));
+							$price = isset($row["price"]) && !empty($row["price"]) ? $row["price"] : '';
 
 							?>
 
-								<div
-									class="room-table__cell"
-									data-title="<?php echo $dateFrom . "-" . $dateTo; ?>"
-								>
-										<input class="table-input-date" type="text" value="">
-								</div>
+							<div
+								class="room-table__cell"
+								data-title="<?php echo $dateFrom . "-" . $dateTo; ?>"
+							>
+									<input class="table-input-date" type="text" value="<?php echo $price; ?>">
+							</div>
 
-							<?php
-
-							endforeach;
-
-							endif;
-
-						?>
+						<?php	endforeach; ?>
+        </div>
 
 		</div>
 
 
-	<div class="bottom-container">
-	     <button id="button-tables-save" class="button button-form button-tables-save">Сохранить</button>
-	</div>
+	<?php endforeach; ?>
 
 </div>

@@ -159,41 +159,57 @@ function getDataTable($group_id) {
 		die($response);
 	}
 
-	 $sql	= "SELECT 
-						 lt.table_id,
-						 lt.period_id,
-						 lt.period_count,
-						 lt.date_from,
-						 lt.date_to,
-						 pp.value as price,
-						 pp.row as table_row
-	 				FROM
+	// Что просходит в запросе:
+	// Первым делом мы создаем две таблицы. 
+	// 1. Делаем выборку по всем строкам (у нас их две) и привязываем периоды по группе. Таблица ct1
+	// 2. Делаем выборку по всем периодам и привязываем к ним все цены ( по id периода). Таблица ct2
+	// Дальше связываем эти таблицы по периодам и строкам
 
-						(SELECT
-								tt.id as table_id,
-								prt.id as period_id,
-								prt.count as period_count,
-								prt.date_from,
-								prt.date_to
-							FROM nwyt_tables tt
-								RIGHT JOIN nwyt_periods prt
-								ON tt.group_id = prt.group_id
-							WHERE tt.group_id = ?) as lt
 
-						LEFT JOIN nwyt_prices pp
-						 ON (lt.table_id = pp.table_id AND lt.period_id = pp.period_id )
-											 
-					ORDER BY lt.table_id";
+	 $sql	= "SELECT
+						 ct1.row_id,
+						 ct1.period_id,
+						 ct1.date_from,
+						 ct1.date_to,
+						 ct1.period_count,
+						 ct2.price,
+						 ct2.price_row
+
+						 FROM
+
+							(SELECT
+								 rr.id as row_id,
+								 cct.id as period_id,
+								 cct.date_from as date_from,
+								 cct.date_to as date_to,
+								 cct.count as period_count
+								 FROM nwyt_rows rr
+								 LEFT JOIN nwyt_periods cct
+								 ON rr.group_id = cct.group_id
+								 WHERE group_id = ?
+							 ) ct1
+
+						 LEFT JOIN 
+						 
+							(SELECT
+									 tp.value as price,
+									 tp.row as price_row,
+									 ttp.id as period_id
+									 FROM
+									 nwyt_periods ttp
+									 LEFT JOIN nwyt_prices tp
+									 ON ttp.id = tp.period_id
+								) ct2
+
+						 ON ct1.period_id = ct2.period_id AND ct1.row_id = ct2.price_row
+						 ORDER BY ct1.row_id";
 
 	$req = $connect->prepare($sql);
 	$req->execute(array($group_id));
 	$data = $req->fetchAll();
 
 	return(create_arrays_by($data));
-
 }
-
-
 
 
 ?>

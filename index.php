@@ -37,7 +37,7 @@
 ?>
 
 
-<button id="add_new_table">Добавить таблицу</button>
+<button id="add_new_table" >Добавить таблицу</button>
 
 
 <?php

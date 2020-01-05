@@ -1,5 +1,5 @@
 
-const currentYear = "2019-01-01";
+const currentYear = "2020-01-01";
 let datePickers = [];
 
 
@@ -15,13 +15,6 @@ $(document).ready(function(){
 
 
 	//
-
-	// [
-	// 	{"dateFrom" : "x1", "dateTo" : "y1"},
-	// 	{"dateFrom" : "x2", "dateTo" : "y2"},
-	// 	{"dateFrom" : "x3", "dateTo" : "y3"}
-	// ];
-
 
 
 });
@@ -324,7 +317,7 @@ $(document).on("submit", "#prices_periods", function(e) {
 		data: {
 			"periods" : JSON.stringify(dataPeriod),
 			"group_id" : "1",
-			"action" : "saveHeadData"
+			"action" : "savePeriodData"
 		},
 		success: function(data) {
 
@@ -353,54 +346,93 @@ $(document).on("submit", "#prices_periods", function(e) {
 
 $(document).on("click", "#button-tables-save", function() {
 
-	let data = [];
+	let data_table = [];
 	let container = $("#tables-container");
 	let error = false;
 
 	container.find(".room-table").each(function() {
 		
-		let roomObj = {};
-
 		if (error) return false;
 
-		room_id = $(this).attr("data-room");
+		table_id = $(this).attr("data-table-id");
 
-		let rowMain = $(this).find(".room-table__row-main");
-		let rowSub = $(this).find(".room-table__row-main");
+		let table_rows = $(this).find(".room-table__row-body");
 
-		rowMain.find(".table-input-date").each(function() {
-			let value = $(this).val();
-			let period = $(this).closest(".room-table__cell").attr("data-title");
+		table_rows.each(function(index) {
 
-			if(value == '') {
-				value = 0;
-			}
+			let table_row = $(this);
+			let table_row_index = index+1;
 
-			value = parseInt(value);
+			table_row.find(".table-input-date").each(function() {
 
-			if(value && isNumber(value)) {
+				let tableObj  = {};
+				let value     = $(this).val();
+				let period_id = $(this).attr("data-period-id");
 
-			} else {
-				error = true;
-				alert("В таблице допускаются только числовые значения");
-				console.log("error", value);
-				console.log("error", isNumber(value));
-			}
+				if(value == '') {
+					value = 0;
+				}
 
-			if (error) return false;
+				value = parseInt(value);
 
-			Object.assign(roomObj, {[period] : value});
+				if(isNumber(value)) {
 
+						if(value > 0) {
+
+							tableObj = Object.assign(tableObj, {
+								"table_id"  : table_id,
+								"period_id" : period_id,
+								"row_id"    : table_row_index,
+								"value"     : value
+							});
+
+							data_table.push(tableObj);
+
+						}
+
+				} else {
+						error = true;
+						alert("В таблице допускаются только числовые значения");
+						console.log("error", value);
+						console.log("error", isNumber(value));
+				}
+	
+				if (error) return false;
+
+			});
 		});
-
-		roomObj["id"] = room_id;
-
-		console.log("roomObj", roomObj);
-
 	});
 
 	if (error) return false;
 
-	console.log("Проверка на ошибку");
+	$.ajax({
+		method: "POST",
+		url: "./model.php",
+		data: {
+			"tables" : JSON.stringify(data_table),
+			"action" : "saveTableData"
+		},
+		success: function(data) {
+
+			responseText = "";
+			responseType = "";
+
+			console.log(data);
+
+			if(data.status) {
+				responseText = data.text;
+				responseType = data.status;
+			 } else {
+				responseText = data ? data : "Неизвестная ошибка";
+				responseType = "error";
+			}
+
+			notifyShow(container, responseType, responseText);
+
+		},
+		error: function(data, errorThrown) {
+       alert('request failed : '+ errorThrown);
+    }
+	})
 
 });

@@ -179,6 +179,8 @@ a[class*="js"],
 .tables-container {
     margin: 50px 0;
     padding: 50px 15px;
+    position: relative;
+    overflow: hidden;
 }
 
 .room-table {

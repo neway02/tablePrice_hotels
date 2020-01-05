@@ -5,7 +5,10 @@ $group_id = 1;
 
 require_once("./model.php");
 
-$dataHeading = getDataTable($group_id);
+$data = getDataTable($group_id);
+
+$data_period = $data[0];
+
 
 ?>
 
@@ -14,7 +17,7 @@ $dataHeading = getDataTable($group_id);
     <input type="hidden" name="group_id" value="1">
     <ul id="price-room__period-list" class="price-room__period-list">
 
-			<?php	if(!is_array($dataHeading) || empty($dataHeading)) : ?>
+			<?php	if(!is_array($data_period) || empty($data_period)) : ?>
 
 				<li class="price-room__period-item" data-date-count=1>
 					<div class="price-room__form">
@@ -36,11 +39,11 @@ $dataHeading = getDataTable($group_id);
 
 				<?php else :
 
-						foreach($dataHeading as $row) {
+						foreach($data_period as $row) {
 
 							$dateFrom = $row["date_from"];
 							$dateTo = $row["date_to"];
-							$dateCount = $row["count"];
+							$dateCount = $row["period_count"];
 
 							?>
 
